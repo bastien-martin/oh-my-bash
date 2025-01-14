@@ -47,6 +47,12 @@
 
 [![](clean/clean-dark.png)](clean/clean-dark.png)
 
+## `clear & strict`
+
+Highly Inspired by 90210 and not used with all SVN/GIT part. I'm using it on production environment.
+
+[![](clear_and_strict/clear_and_strict.png)](clear_and_strict/clear_and_strict.png)
+
 ## `cooperkid`
 
 [![](cooperkid/cooperkid-dark.png)](cooperkid/cooperkid-dark.png)
