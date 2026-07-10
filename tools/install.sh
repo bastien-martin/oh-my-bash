@@ -290,23 +290,41 @@ function _omb_install_main {
   # precedence over umasks except for filesystems mounted with option "noacl".
   umask g-w,o-w
 
-  printf '%s\n' "${BLUE}Cloning Oh My Bash...${NORMAL}"
-  type -P git &>/dev/null || {
-    echo "Error: git is not installed"
-    return 1
-  }
-  # The Windows (MSYS) Git is not compatible with normal use on cygwin
-  if [[ $OSTYPE == cygwin ]]; then
-    if command git --version | command grep msysgit > /dev/null; then
-      echo "Error: Windows/MSYS Git is not supported on Cygwin"
-      echo "Error: Make sure the Cygwin git package is installed and is first on the path"
+  if type -P git &>/dev/null; then
+    # The Windows (MSYS) Git is not compatible with normal use on cygwin
+    if [[ $OSTYPE == cygwin ]]; then
+      if command git --version | command grep msysgit > /dev/null; then
+        echo "Error: Windows/MSYS Git is not supported on Cygwin"
+        echo "Error: Make sure the Cygwin git package is installed and is first on the path"
+        return 1
+      fi
+    fi
+
+    printf '%s\n' "${BLUE}Cloning Oh My Bash...${NORMAL}"
+    _omb_install_run git clone --depth=1 "$OSH_REPOSITORY" "$OSH" || {
+      printf "Error: git clone of oh-my-bash repo failed\n"
+      return 1
+    }
+  else
+    # Git not available: use local files if install.sh is running from within
+    # an already-prepared oh-my-bash directory (e.g. extracted + patched by a
+    # deployment script).
+    local _omb_local_dir
+    _omb_local_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && cd .. && pwd)"
+    if [[ -f "$_omb_local_dir/templates/bashrc.osh-template" ]]; then
+      printf '%s\n' "${BLUE}Git not available. Installing from local directory...${NORMAL}"
+      local _omb_parent_dir
+      _omb_parent_dir="$(dirname "$OSH")"
+      [[ -d "$_omb_parent_dir" ]] || mkdir -p "$_omb_parent_dir"
+      _omb_install_run cp -a "$_omb_local_dir" "$OSH" || {
+        printf "Error: Failed to copy oh-my-bash to %s\n" "$OSH"
+        return 1
+      }
+    else
+      echo "Error: git is not installed"
       return 1
     fi
   fi
-  _omb_install_run git clone --depth=1 "$OSH_REPOSITORY" "$OSH" || {
-    printf "Error: git clone of oh-my-bash repo failed\n"
-    return 1
-  }
 
   if [[ $install_prefix ]]; then
     _omb_install_system_bashrc

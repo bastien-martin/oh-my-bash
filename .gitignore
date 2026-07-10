@@ -6,6 +6,9 @@
 !/custom/example.sh
 /custom/
 
+# generated release artifacts
+/dist/
+
 # temp files directories
 /cache/
 /log/
